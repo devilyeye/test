@@ -1,0 +1,172 @@
+<form action="index.php?app=b2c&amp;ctl=admin_dlycorp&amp;act=addnew&amp;finder_id=a1c7d6" id="newdlycorp-new-form" method="POST">
+<div class="tableform">
+    <div class="division">
+    <table width="100%" cellspacing="0" cellpadding="0">
+    <tbody>
+        <tr>
+            <th><em class="red">*</em><label for="dlycorp_name"><{t}>物流公司名称<{/t}></label></th>
+            <td><input type="text" id="dlycorp_name" caution="<{t}>请填写公司名称<{/t}>" vtype="required" name="name" title="<{t}>物流公司名称<{/t}>" class="x-input " autocomplete="off"></td>
+        </tr>
+        <tr>
+            <th><em class="red">*</em><label for="dlycorp_code"><{t}>物流公司代码<{/t}></label></th>
+            <td><{input type="corp_code" id="dlycorp_code" name="corp_code" title="{t}物流公司代码{/t}" vtype="required" value="" class="x-input " autocomplete="off"}></td>
+        </tr>
+        <tr>
+            <th><{t}>面单类型：<{/t}></th>
+            <td>
+                <input type="radio" name="tmpl_type" onchange="tmplTypeChange()" value="normal" checked >普通面单
+                <input type="radio" name="tmpl_type" onchange="tmplTypeChange()" value="electron" >电子面单
+            </td>
+        </tr>
+        <tr id="normalChannel">
+            <th><{t}>单号来源：<{/t}></th>
+            <td>线下获取</td>
+        </tr>
+        <tr id="electronChannel">
+            <th><{t}>单号来源：<{/t}></th>
+            <td>
+                <{input type="select" name='electron_channel_id' id='electron_channel_id' rows=$electronchannel valueColumn="channel_id" labelColumn="name" vtype="required" style="width:100px;" class="x-input-select inputstyle"}>
+            </td>
+        </tr>
+        <tr id="normalTmpl">
+            <th><{t}>选择普通面单模板：<{/t}></th>
+            <td><{input type="select" name='normal_tmpl_id' rows=$normalTmpl valueColumn="prt_tmpl_id" labelColumn="prt_tmpl_title" vtype="required" style="width:100px;" class="x-input-select inputstyle"}> <em><font color='red'>*</font></em></td>
+        </tr>
+        <tr id="electronTmpl">
+            <th><{t}>选择电子面单模板：<{/t}></th>
+            <td><{input type="select" name='electron_tmpl_id' rows=$electronTmpl  valueColumn="prt_tmpl_id" labelColumn="prt_tmpl_title" vtype="required" style="width:100px;" class="x-input-select inputstyle" id="electron_tmpl_id"}> <em><font color='red'>*</font></em></td>
+        </tr>
+        <tr>
+            <th><label for="dlycorp_website"><{t}>网址<{/t}></label></th>
+            <td><input type="text" id="dlycorp_website" name="website" title="<{t}>网址<{/t}>" class="x-input " autocomplete="off"></td>
+        </tr>
+        <tr>
+            <th><label for="dlycorp_request_url"><{t}>物流公司询件网址<{/t}></label></th>
+            <td><input type="text" id="dlycorp_request_url" name="request_url" title="<{t}>物流公司询件网址<{/t}>" class="x-input " autocomplete="off"></td>
+        </tr>
+        <tr>
+            <th><label for="dlycorp_ordernum"><{t}>排序<{/t}></label></th>
+            <td><input type="text" id="dlycorp_ordernum" name="ordernum" vtype="unsignedint" title="<{t}>排序<{/t}>" style="width: 50px;" class="x-input " autocomplete="off"></td>
+        </tr>
+    </tbody>
+    </table>
+    </div>
+</div>
+</form>
+
+<{area inject=".mainFoot"}>
+<div class="table-action">
+    <table width="100%" cellspacing="0" cellpadding="0">
+    <tbody>
+        <tr>
+            <td><button class="btn btn-primary" id="newdlycorp-new-form-submit" type="submit"><span><span><{t}>确定<{/t}></span></span></button></td>
+        </tr>
+    </tbody>
+    </table>
+</div>
+<{/area}>
+
+<script>
+(function(){
+var _form = $('newdlycorp-new-form');
+var btn =$('newdlycorp-new-form-submit');
+var finder = finderGroup['<{$env.get.finder_id}>'];
+
+_form.store('target',{
+    onComplete:function(){
+    try{
+        var _dialogIns = btn.getParent('.dialog').retrieve('instance');
+    }catch(e){}
+        if(_dialogIns){
+            _dialogIns.close();
+            finder.refresh.delay(400,finder);
+        }
+    }
+});
+
+btn.addEvent('click',function(){
+    _form.fireEvent('submit',{stop:$empty});
+});
+
+$('b2c-admin-corp-other-code').addEvent('click',function(el){
+    var _target = $(el.target) || $(el);
+    var _corp_code_copy = $E('input[name^=corp_code_copy]');
+    if (_corp_code_copy){
+        _corp_code_copy.set('vtype','required');
+    }
+});
+
+$('dlycorp_code').addEvent('click',function(el){
+    var _target = $(el.target) || $(el);
+    var _corp_code_copy = $E('input[name^=corp_code_copy]');
+    if (_corp_code_copy){
+        _corp_code_copy.removeProperty('vtype');
+        $('b2c-admin-corp-other-code').checked = false;
+    }
+});
+
+var m_electron_dly = {
+    'EMS':'EMS普通B',
+    'EYB':'EMS经济A',
+    'SF':'顺丰模板_标准',
+    'ZJS':'菜鸟宅急送',
+    'ZTO':'菜鸟中通',
+    'HTKY':'菜鸟百世汇通',
+    'UC':'菜鸟优速',
+    'YTO':'菜鸟圆通',
+    'STO':'菜鸟申通',
+    'TTKDEX':'菜鸟天天快递',
+    'QFKD':'菜鸟全峰',
+    'FAST':'菜鸟快捷',
+    'POSTB':'菜鸟邮政小包',
+    'GTO':'菜鸟国通',
+    'YUNDA':'韵达标准',
+    'JDCOD':'京东电子面单A'
+  };
+
+$('electron_channel_id').addEvent('change',function(){
+    var channelType = JSON.decode('<{$channelType}>');
+    var channel_id = $('electron_channel_id').value;
+
+    if(channelType[channel_id]){
+        $('dlycorp_code').getElements("option").each(function(item){
+            if (item.value == channelType[channel_id].toUpperCase()) {
+                item.selected = true;
+            }
+        });
+        var tname = m_electron_dly[channelType[channel_id].toUpperCase()];
+
+        if($defined(tname)){
+            var options = $$('#newdlycorp-new-form #electronTmpl select option');
+            options.each(function(option){
+                if (tname == option.getText()) {
+                    option.selected = true;
+                };
+            });
+        }
+    }else{
+        $('dlycorp_code').options[0].selected = true;
+        $('electron_tmpl_id').options[0].selected = true;
+    }
+});
+
+})();
+
+function tmplTypeChange(){
+    if($$('input[name=tmpl_type]:checked').get('value') == 'normal'){
+        $('normalTmpl').show();
+        $('electronTmpl').hide();
+        $('normalChannel').show();
+        $('electronChannel').hide();
+    }else if($$('input[name=tmpl_type]:checked').get('value') == 'electron'){
+        $('electronTmpl').show();
+        $('normalTmpl').hide();
+        $('electronChannel').show();
+        $('normalChannel').hide();
+    }
+    $('dlycorp_code').options[0].selected = true;
+    $('electron_tmpl_id').options[0].selected = true;
+}
+
+tmplTypeChange();
+</script>

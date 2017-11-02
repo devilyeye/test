@@ -1,0 +1,58 @@
+<div class="full-screen">
+    <header>
+    <div class="a-bar">
+        <a href="<{$member_center_url}>" class="a-back">
+            <i class="arr left"></i>返回
+        </a>
+        <div class="a-name">积分兑换优惠券</div>
+    </div>
+    </header>
+    <div class="coupons">
+        <{if $couponList}>
+            <{foreach from=$couponList item=item}>
+                <div class="gb">
+	                <div class="d-line">
+		                <span class="l-k">名称：</span>
+		                <span class="l-v"><{$item.cpns_name}></span>
+		                <span class="l-k">有效期：</span>
+		                <span class="l-v"><{$item.time.from_time|cdate:SDATE_STIME}> ~ <{$item.time.to_time|cdate:SDATE_STIME}></span>
+		                <span class="l-k">所需积分：</span>
+		                <span class="l-v"><{$item.cpns_point}></span>
+		                <span class="l-v">
+			                <{if $site_point_usage =='true'}>
+							    <{if $item.cpns_status}>
+							        <a class="wap_exchange_coupon_act" cpns_id="<{$item.cpns_id}>" rel='_request'><span class="icon orange"><{t}>兑换<{/t}></span></a>
+							    <{else}>
+							        <{t}>当前等级或积分不够不能兑换<{/t}>
+							    <{/if}>
+							<{else}>
+							    <{t}>积分只用于抵扣<{/t}>
+							<{/if}>
+						</span>
+	                </div>
+                </div>
+            <{/foreach}>
+        <{else}>
+            <div><br />尚无可兑换的优惠券</div>
+        <{/if}>
+    </div>
+</div>
+
+<script type="text/javascript">
+$('.wap_exchange_coupon_act').bind('click',function(){
+       var data = 'cpns_id='+this.getAttribute('cpns_id');
+       $.post('<{link app=b2c ctl=wap_member act=exchange}>',data,function(re){
+    	   var o = JSON.parse(re);
+    	   var message = o.message;
+           if(o.success){
+               popup(message,2000);
+               setTimeout(function(){
+            	   location.href='<{link app=b2c ctl=wap_member act=coupon}>';
+            	},2000);
+           }else{
+        	   popup(message,2000);
+           }
+       });
+       return false;
+});
+</script>

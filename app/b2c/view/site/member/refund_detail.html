@@ -1,0 +1,97 @@
+<!-- 会员中心主内容区 -->
+<div class="page-article">
+  <div class="member-order">
+    <div class="member-notice">
+      <div class="member-notice-content">
+        <div class="member-order-desc">
+          <{t}>退款申请单号<{/t}>：<i class="text-warn"><{$refund_apply_info.refund_apply_bn}></i>
+        </div>
+        <button class="btn" type="hidden"></button>
+        <div class="steps member-order-steps">
+          <table width="100%">
+            <tbody>
+              <tr>
+                <td class="step-item step-1 active"><span><q class="icon">&#x50;</q><i>1</i>提交申请</span></td>
+                <{if $refund_apply_info.status=='0'}>
+                <td class="icon step-arrow">&#x28;</td>
+                <td class="step-item step-2"><span><q class="icon">&#x50;</q><i>2</i>审核申请</span></td>
+                <td class="icon step-arrow">&#x28;</td>
+                <td class="step-item step-3"><span><q class="icon">&#x50;</q><i>3</i>退款处理</span></td>
+                <td class="icon step-arrow">&#x28;</td>
+                <td class="step-item step-4"><span><q class="icon">&#x50;</q><i>4</i>完成</span></td>
+                <{else}>
+	                <{if $refund_apply_info.status=='1'}>
+	                <td class="icon step-arrow">&#x28;</td>
+                    <td class="step-item step-2 active"><span><q class="icon">&#x50;</q><i>2</i>审核申请</span></td>
+	                <td class="icon step-arrow">&#x28;</td>
+	                <td class="step-item step-3 active"><span><q class="icon">&#x50;</q><i>3</i>已拒绝</span></td>
+	                <{/if}>
+	                <{if $refund_apply_info.status=='2'}>
+	                <td class="icon step-arrow">&#x28;</td>
+                    <td class="step-item step-2 active"><span><q class="icon">&#x50;</q><i>2</i>审核申请</span></td>
+	                <td class="icon step-arrow">&#x28;</td>
+	                <td class="step-item step-3 active"><span><q class="icon">&#x50;</q><i>3</i>已退款</span></td>
+	                <td class="icon step-arrow">&#x28;</td>
+                    <td class="step-item step-4 active"><span><q class="icon">&#x50;</q><i>4</i>完成</span></td>
+	                <{/if}>
+                <{/if}>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="member-order-message member-mod">
+        <div class="member-mod-title">
+          <h2>详细信息</h2>
+        </div>
+        <div class="memeber-mod-content">
+          <ul>
+              <li class="first">
+                  <div class="message-text">
+                    <table><tr><td>订单号：</td><td><{$refund_apply_info.order_id}></td></tr></table>
+                  </div>
+              </li>
+              <li class="first">
+                  <div class="message-text">
+                    <table><tr><td>付款信息：</td><td><{$refund_apply_info.money|cur_odr}></td></tr></table>
+                  </div>
+              </li>
+              <li class="first">
+                  <div class="message-text">
+                    <table>
+                        <tr>
+                            <td>取消原因：</td>
+                            <td><{$refund_apply_info.refunds_reason}></td>
+                       </tr>
+                     </table>
+                  </div>
+              </li>
+            </ul>
+        </div>
+      </div>
+	 <div class="member-order-message member-mod">
+	    <div class="member-mod-title">
+	      <h2>处理记录</h2>
+	    </div>
+	    <div class="memeber-mod-content">
+	      <ul>
+	          <{foreach from=$refund_apply_log item=log_item}>
+	          <li class="first">
+	              <div class="message-text">
+	                <table width="100%">
+	                   <tr>
+	                       <td width="20%"><{$log_item.op_name}></td>
+	                       <td width="20%"><{$log_item.log_text}></td>
+	                       <td width="20%"><{$log_item.alttime|cdate:FDATE_STIME}></td>
+	                   </tr>
+	                </table>
+	              </div>
+	          </li>
+	          <{/foreach}>
+	        </ul>
+	    </div>
+	  </div>
+    
+  </div>
+</div>

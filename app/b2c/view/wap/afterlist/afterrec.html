@@ -1,0 +1,161 @@
+<div class="full-screen">
+    <header>
+    <div class="a-bar">
+        <a href="javascript:history.back()" class="a-back">
+            <i class="arr left"></i>
+            返回
+        </a>
+        <div class="a-name">
+            我的订单
+        </div>
+    </div>
+    </header>
+    <div class="full-padding">
+        <ul class="mem-order-list">
+            <{foreach from=$return_list item="order" name=orders key="key"}>
+            <li class="mem-order-item">
+            <div class="gb">
+                <div class="col2">
+                    <div class="col">
+                        <div class="d-line">
+                            <div class="l-k">订单号：</div>
+                            <div class="l-v"><{$order.order_id}></div>
+                        </div>
+
+                        <div class="d-line">
+                            <div class="l-k">申请时间：</div>
+                            <div class="l-v">
+                                <{$order.add_time|cdate:FDATE_STIME}>
+                            </div>
+                        </div>
+                        <div class="d-line">
+                            <div class="l-k">状态：</div>
+                            <div class="l-v">
+                                <{switch from=$order.status}>
+                                    <{case value=1}><{t}>申请中<{/t}>
+                                    <{case value=2}><{t}>审核中<{/t}>
+                                    <{case value=3}><{t}>审核通过<{/t}>
+                                    <{case value=4}><{t}>完成<{/t}>
+                                    <{case value=5}><{t}>审核未通过<{/t}>
+                                <{/switch}>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="col d-line">
+                        <div class="t-r">
+                            <a href="<{link app=b2c ctl=wap_member act=afterrec_info arg0=$order.return_id}>" >
+                                查看
+                                <i class="arr right"></i>
+                            </a>
+                        </div>
+                        <{if $order.status == '3' && !$order.customer_logistics}>
+                        <div class="t-r">
+                            <a href="javascript:void(0);" class="action-logistics-popup" return_id="<{$order.return_id}>">
+                                填写物流信息
+                                <i class="arr right"></i>
+                            </a>
+                        </div>
+                        <div id="aftersales_logistics_popup_<{$order.return_id}>" style="display:none;" class="point-dis">
+				                <p class="dis-set"><{t}>选择物流公司<{/t}>: 
+				                    <select id="logistics_company_name_<{$order.return_id}>">
+				                    <option value="">请选择</option>
+				                    <{foreach from=$dlycorps item=dlycorp_info}>
+				                    <option value="<{$dlycorp_info.name}>"><{$dlycorp_info.name}></option>
+				                    <{/foreach}>
+				                    </select>&nbsp;*
+				                </p>
+				                <p class="dis-set"><{t}>物流单号<{/t}>: <input id="logistics_no_<{$order.return_id}>" type="text">&nbsp;*</p>
+				                <p class="dis-set"><{t}>收货手机<{/t}>: <input id="logistics_mobile_<{$order.return_id}>" type="text">&nbsp;*</p>
+				                <p class="dis-set"><{t}>收货地址<{/t}>: <input id="logistics_address_<{$order.return_id}>" type="text">&nbsp;*</p>
+				                <div>
+				                    <div style="width:80px;margin:0px auto">
+				                    <button class="btn submit_logistics_button" style="font-size:14px" order_id="<{$order.order_id}>" return_id="<{$order.return_id}>" afterrec_type="<{$type}>"><span><{t}>提交物流信息<{/t}></span></button>
+				                    </div>
+				                </div>
+				         </div>
+                        <{/if}>
+                    </div>
+                </div>
+            </div>
+            <ul class="mem-order-pt c-fix">
+                <!-- goods -->
+                <{if $order.product_data}>
+                    <{foreach from=$order.product_data item=item_goods name=goods_item}>
+                        <!-- goods -->
+                        <{$item_goods.bn}>
+                        <li class="mem-pt-item">
+                            <a href='<{$item_goods.link_url}>' title="<{$item_goods.product.quantity}>--<{$item_goods.name}>">
+                            <img src='<{$item_goods.thumbnail_pic|default:$env.conf.site.default_thumbnail_pic|storager:'s'}>' />
+                            </a>
+                            <i class="num"><{$item_goods.num}></i>
+                        </li>
+                    <{/foreach}>
+                <{/if}>
+            </ul>
+            </li>
+            <{/foreach}>
+        </ul>
+    </div>
+</div>
+<{wap_pagers data=$pager}>
+<script>
+function receive(url){
+    var xmlHttp;
+    try{
+        xmlHttp=new XMLHttpRequest();        
+    }catch(e){
+        try{
+            xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+        }catch(e){
+            try{
+                xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+            }catch(e){
+                return false;
+            }
+        }
+    }
+    xmlHttp.open('post',url);
+    xmlHttp.onreadystatechange = function () {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            alert('已完成收货');
+            location.reload();
+        }
+    }
+        xmlHttp.send(null);
+}
+
+(function(){
+    
+    $('.action-logistics-popup').bind('click',function(e){
+        var return_id = this.getAttribute("return_id");
+        new Dialog('#aftersales_logistics_popup_'+return_id,{title: '填写物流信息'});
+    });
+    
+    $('.submit_logistics_button').bind('click',function(e){
+        var return_id = this.getAttribute("return_id");
+        var order_id = this.getAttribute("order_id");
+        var logistics_company_name = $('#logistics_company_name_'+return_id+' option:selected').val();
+        var logistics_no = $('#logistics_no_'+return_id).val();
+        var logistics_mobile = $('#logistics_mobile_'+return_id).val();
+        var logistics_address = $('#logistics_address_'+return_id).val();
+        var data = 'return_id='+return_id+'&order_id='+order_id+'&logistics_company_name='+logistics_company_name+'&logistics_no='+logistics_no+'&logistics_mobile='+logistics_mobile+'&logistics_address='+logistics_address;
+        $.post('<{link app=b2c ctl=wap_member act=save_logistics_info}>',data,function(re){
+            var o = JSON.parse(re);
+            if(o.success){
+                $(".dialog").hide();
+                new Dialog('#success',{type: 'confirm'});
+                $('#success .checkout-success').html(o.suc_msg);
+                setTimeout(function(){location.reload(true)},2000);
+            }else{
+                return alert(o.err_msg);
+            }
+        });
+        return false;
+    });
+    
+})();
+</script>

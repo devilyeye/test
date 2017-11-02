@@ -1,0 +1,7 @@
+<cronentries>
+    <cron id="pointprofessional_tasks_point">
+        <description>积分企业版定时任务</description>
+        <schedule>* */1 * * *</schedule>
+        <enabled>true</enabled>
+    </cron>
+</cronentries>

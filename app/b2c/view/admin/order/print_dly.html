@@ -1,0 +1,192 @@
+<h3><{t}>信息确认<{/t}></h3>
+<form id="dly_printer_form"  action="index.php?app=express&ctl=admin_delivery_printer&act=do_print" method="post">
+	
+<input type="hidden" id="order_id" name="order[order_id]" value="<{$orderInfo.order_id}>" />
+<input type="hidden" name="order[order_count]" value="<{$orderInfo.itemnum}>" />
+<input type="hidden" name="order[ship_time]" value="<{$orderInfo.consignee.r_time}>" />
+<input type="hidden" name="order[order_price]" value="<{$orderInfo.total_amount|cur_odr:$orderInfo.currency}>" />
+<input type="hidden" name="order[order_weight]" value="<{$orderInfo.weight}>" />
+<input type="hidden" name="dly_tmpl_id" id="dly_tmpl_id" />
+<input type="hidden" name="tmpl_type" id="tmpl_type" />
+<input type="hidden" name="channel_id" id="channel_id" />
+
+<div class="tableform" id="x-order_tableform">
+    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tbody>
+    <tr>
+        <td>
+            <h4><{t}>收货地址信息<{/t}></h4>
+        </td>
+    </tr>
+    </tbody>
+    </table>
+
+    <div class="division">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%" >
+        <tbody>
+            <tr>
+                <th><{t}>姓名：<{/t}></th>
+                <td colspan="3"><input size="10" style="width:80px;" value="<{$orderInfo.consignee.name}>"  class="item itemrow _x_ipt" name="order[ship_name]"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+                <td rowspan="5" style="vertical-align:middle;">
+                    <center>
+                        <div class="division" style="width:150px;">
+                            <table border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td style="text-align:left; color:#aaaaaa;"><{t}>您也可以将编辑过的收货地址更新至订单<{/t}></td>
+                            </tr>
+                            <tr>
+                                <td style="height:40px;"><button id="btn_save_addr"><{t}>保存订单地址<{/t}></button></td>
+                            </tr>
+                            </table>
+                        </div>
+                    </center>
+                </td>
+            </tr>
+
+            <tr>
+                <th><{t}>省区：<{/t}></th>
+                <td><{if $order_status == 'dead' || $order_status == 'finish'}><{$orderInfo.consignee.area|ship_area}><{else}><span id="odr-delivery-select-area"><{input app="ectools" type="region" name="order[ship_area]" value=$orderInfo.consignee.area}></span><{/if}></td>
+                <th><{t}>邮编：<{/t}></th>
+                <td><input style="width:90px;" size="6"  class="item itemrow _x_ipt" name="order[ship_zip]" value="<{$orderInfo.consignee.zip}>"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+            </tr>
+            <tr>
+                <th><{t}>地址：<{/t}></th>
+                <td colspan="3"><input size="50" style="width:400px;" class="item itemrow _x_ipt" name="order[ship_addr]" value="<{$orderInfo.consignee.addr}>"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+            </tr>
+            <tr>
+                <th><{t}>手机：<{/t}></th>
+                <td><input size="36"  style="width:145px;" class="item itemrow _x_ipt" value="<{$orderInfo.consignee.mobile}>" name="order[ship_mobile]"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+                <th><{t}>电话：<{/t}></th>
+                <td><input size="36" style="width:145px;"  class="item itemrow _x_ipt" value="<{$orderInfo.consignee.telephone}>" name="order[ship_tel]"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+            </tr>
+            <tr>
+                <th><{t}>备注：<{/t}></th>
+                <td colspan="3"><input size="50" style="width:400px;" class="item itemrow _x_ipt" name="order[order_memo]" value="<{$orderInfo.memo}>"<{if $order_status == 'dead' || $order_status == 'finish'}> readOnly="true"<{/if}> autocomplete="off"/></td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+	
+    <h4><{t}>发货地址信息<{/t}></h4>
+    <{if !count($dly_centers)>0}> 
+        <div class="notice"> <{t}>系统发货信息为空,请返回后台管理发货信息<{/t}></div>
+    <{else}>
+        <div class="division">
+            <label><{t}>选择发货点:<{/t}></label>
+            <select name="dly_center" id="dly_center_select" class="x-input-select inputstyle">
+            <{foreach from=$dly_centers item=item}>
+                <option value="<{$item.dly_center_id}>" <{if $item.dly_center_id eq $default_dc}>selected="selected"<{/if}>><{$item.name}></option>
+            <{/foreach}>
+            </select> 
+        </div>
+        <div class="division" id="dly_center_row">
+            <{include file="admin/order/dly_center.html"}>
+        </div>
+        <script> 
+        $('dly_center_select').addEvent('change',function(e){
+        var dly_center_id =this.getValue();
+        new Request.HTML({url:'index.php?app=express&ctl=admin_delivery_center&act=instance&p[0]='
+          +dly_center_id,update:$('dly_center_row')}).send();
+          });
+        </script>
+    <{/if}>
+	
+    <h4><{t}>物流信息<{/t}></h4>
+    <{if count($corplist) < 0}>
+           <div class="notice"> <{t}>物流公司信息为空，请先进行添加<{/t}></div>   
+    <{else}>
+         <div class="division clearfix">
+            <label><{t}>选择物流公司:<{/t}></label>
+            <{input type="select" name='corp_id' id='chose_corp_id' rows=$corplist  valueColumn="corp_id" labelColumn="name" vtype="required" style="width:100px;" class="x-input-select inputstyle" }>
+         </div>
+     <{/if}>
+
+     <div id="haswaybill" class="notice" style="margin-left:5px;display:none;"></div>
+     <span id="error" style="margin-left:5px;color:red; font-weight:bold;display:none;" class="error" ></span>
+</div>
+
+<div>
+</div>
+
+<table class="table-action">
+    <tr>
+        <td>
+        <{if count($corplist) > 0}>
+            <{button type="button" id="dly_printer_button" onclick="$('dly_printer_form').submit();" label=$___express="确认"|t:'express' class="btn-primary"}>
+        <{else}>
+            <{button type="button" id="dly_printer_button" onclick="$('dly_printer_form').submit();" label=$___express="确认"|t:'express' class="btn-primary" disabled="disabled"}>
+        <{/if}>
+        </td>
+    </tr>
+</table>
+</form>
+
+<script>
+window.addEvent('domready',function(){ 
+    $('btn_save_addr').addEvent('click',function(e){
+        new Event(e).stop();
+        new Request({
+            url:'index.php?app=b2c&ctl=admin_order&act=save_addr&p[0]=<{$orderInfo.order_id}>',
+            method:'post',
+            data:$('x-order_tableform'),
+            onSuccess:function(r){
+                if(r=='ok'){
+                    alert('<{t}>保存成功!<{/t}>');
+                }else{
+                    alert(r);
+                }
+            }
+        }).send();
+    });
+
+    $('chose_corp_id').addEvent('change',function(e){
+        e.stop();
+        new Request({
+            url:'<{link app=express ctl=admin_delivery_printer act=getCorpInfo}>',
+            method:'post',
+            data:'corp_id='+this.value+'&order_id='+$('order_id').value,
+            onSuccess: function(rs) {
+                rs = JSON.decode(rs);
+                if(rs.error){
+                    $('haswaybill').setStyle('display','none');
+                    $('dly_printer_button').set('disabled', 'true');
+                }else{
+                    $('dly_tmpl_id').value = rs.prt_tmpl_id;
+                    $('tmpl_type').value = rs.tmpl_type;
+                    $('channel_id').value = rs.channel_id;
+                    
+
+                    if(rs.old_logi_no){
+                        var html = '<div><{t}>当前订单您已获取或打印过物流公司：'+rs.old_logi_name+'的电子面单：'+rs.old_logi_no+'，需<a href="javascript:void(0);" onclick="cancel_waybill('+rs.old_logi_id+',\''+rs.old_logi_no+'\')" style="color:blue;font-weight:bold;">取消回收</a>后才能选择其他物流公司进行打印<{/t}></div>';
+                        //.inject('haswaybill');
+                        $('haswaybill').setHTML(html);
+                        $('haswaybill').setStyle('display','');
+                        $('dly_printer_button').set('disabled', 'true');
+                    }else{
+                        $('haswaybill').setStyle('display','none');
+                        $('dly_printer_button').set('disabled', '');
+                    }
+                }
+            }
+        }).send();
+    });
+});
+
+function cancel_waybill(logi_id,logi_no){
+    //new Event(e).stop();
+    new Request({url:'index.php?app=express&ctl=admin_delivery_printer&act=cancelWaybill',data:'old_logi_id='+logi_id+'&old_logi_no='+logi_no+'&order_id='+$('order_id').value,method:'POST',
+        onComplete: function(json){
+            if (json != ''){
+                json = JSON.decode(json);
+            }
+
+            if(json.status == 'error'){
+            
+            }else{
+                $('haswaybill').setStyle('display','none');
+                $('dly_printer_button').set('disabled', '');
+            }
+        }
+    }).send();
+}
+</script>

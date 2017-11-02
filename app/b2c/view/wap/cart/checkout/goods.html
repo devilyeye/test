@@ -1,0 +1,61 @@
+<!-- 商品必填信息 -->
+  <div id="order_goods" class="d-line c-fix" data-validatemsg="请完整填写商品必填信息并确认商品必填信息">
+    <a href="javascript:void(0);" class="action-edit-goods fold">[<{t}>修改<{/t}>]</a>
+    <{foreach from=$minfo item="product" key=product_id}>
+    <div class="gb" style="background:inherit;margin-top:-1px;">
+      <!-- 填写商品必填信息 -->
+      <table class="fill-goods" style="margin: 0 auto; line-height: 24px;">
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <input type="hidden" name="minfo[product_id][]" value="<{$product_id}>" />
+                <{t}>填写购买<{/t}>
+                <b><{$product.name}><{if $product.nums}> x <{$product.nums}><{/if}></b>
+                <{t}>时所需信息<{/t}>
+              </td>
+          </tr>
+          <{foreach key=key from=$product.minfo item="info"}>
+          <tr>
+            <td style="width:60px"><em class="price">*</em><span style="padding: 0 2px;"><{$info.label}>：</span></td>
+            <td>
+              <{if $info.type == 'text'}>
+              <textarea name="minfo[<{$product_id}>][<{$info.name}>][value]" class="should-text" cols="50" rows="5" vtype="required" style="resize:none; border:1px solid #dddddd;width:100%;margin: 5px 0;"></textarea>
+              <{elseif $info.type == 'select'}>
+              <select name="minfo[<{$product_id}>][<{$info.name}>][value]" vtype="required">
+              <{foreach from=$info.options item=opt}>
+              <option value="<{$opt}>"<{if $info.value == $opt}> selected="selected"<{/if}>><{$opt}></option>
+              <{/foreach}>
+              </select>
+              <{else}>
+              <input type="text" class="x-input should-input" name="minfo[<{$product_id}>][<{$info.name}>][value]" id=""  size="50" vtype="required" style="border:1px solid #ddd;margin: 5px; 0" >
+              <{/if}>
+            </td>
+          </tr>
+          <{/foreach}>
+
+        </tbody>
+      </table>
+      <!-- 查看商品必填信息 -->
+      <table class="view-goods fold">
+        <tbody>
+          <{foreach from=$minfo item="product" key=product_id}>
+          <tr>
+            <td colspan="2"><{t}>填写购买<{/t}> <b><{$product.name}><{if $product.nums}> x <{$product.nums}><{/if}></b> <{t}>时所需信息<{/t}>
+            </td>
+          </tr>
+           <{foreach key=key from=$product.minfo item="info"}>
+          <tr>
+            <td>
+              <{$info.label}>：
+            </td>
+            <td>
+              <div class="memo" id="goods_<{$info.name}>_<{$product_id}>"></div>
+            </td>
+          </tr>
+          <{/foreach}>
+          <{/foreach}>
+        </tbody>
+      </table>
+    </div>
+    <{/foreach}>
+  </div>

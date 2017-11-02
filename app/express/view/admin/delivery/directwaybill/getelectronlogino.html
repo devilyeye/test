@@ -1,0 +1,18 @@
+<script>
+    var itemData = <{$postIds}>;
+    var channel_id = "<{$channel.channel_id}>";
+    var logi_id = "<{$logi_id}>";
+    var dly_center = "<{$dly_center}>";
+    var after_print = 1;
+    var directNum = <{$directNum}>;
+
+    setTimeout('getloginopage()',1000);
+    function getloginopage() {
+        new Dialog('index.php?ctl=admin_delivery_printer&act=async_logino_page&app=express&channel_id='+channel_id+'&logi_id='+logi_id+'&dly_center='+dly_center+'&after_print='+after_print+'&itemIds='+encodeURIComponent(itemData)+'&directNum='+directNum,{width:700,height:180,title:'获取物流号',
+            onClose:function(){
+                self.close();
+            }
+        });
+    }
+
+</script>

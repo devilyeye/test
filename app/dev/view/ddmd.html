@@ -1,0 +1,24 @@
+
+<a name="<{$dbtable.table_name}>"></a>
+## <{$dbtable.table_name}>(<{$dbtable.comment}>)
+
+- 表结构
+
+| ColumnName | Comment | Type | Not null | Default | Extra |
+| ------------- |-------------|-------------|-------------|-------------|-------------|
+<{foreach from=$dbtable.columns item=column key=columnName}>
+<{if $column.is_webpos}>
+<{else}>
+|  <{$columnName}> | <{if $column.comment}><{$column.comment}><{else}><{$column.label}><{/if}> |  <{$column.type}> | <{if $column.required}>Yes<{else}>No<{/if}> | <{$column.default}> | <{$column.extra}> |
+<{/if}>
+<{/foreach}>
+
+- 索引
+
+| Key name | Column names | Unique | Comment |
+| ------------- |-------------|-------------|-------------|
+| primary | <{foreach from=$dbtable.pkeys item=pk}> <{$pk}> <{/foreach}> | Yes |  |
+<{foreach from=$dbtable.index item=index key=keyName}>
+| <{$keyName}> | <{foreach from=$index.columns item=col}> <{$col}> <{/foreach}> | <{if $index.unique}>Yes<{else}>No<{/if}> |  |
+<{/foreach}>
+

@@ -1,0 +1,10 @@
+<desktop>
+	<permissions>
+        <permission id="penker" display='true' workground='b2c.wrokground.sale'>Ecstore-朋客数据互联</permission>
+    </permissions>
+    <workground name="营销" id="b2c.wrokground.sale" controller="admin_sales_coupon" action="index" order="40">
+        <menugroup name="朋客数据互联">
+            <menu controller='admin_penker' action='index' permission='penker' display='true' order='70'>绑定朋客</menu>
+        </menugroup>
+    </workground> 
+</desktop>

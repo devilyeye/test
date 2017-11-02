@@ -1,0 +1,22 @@
+<app>
+  <name>朋客数据互联</name>
+
+  <description>Ecstore-朋客数据互联</description>
+
+  <author>
+      <name>shopex开发团队</name>
+      <email>dev@shopex.cn</email>
+      <url>www.shopex.cn</url>
+  </author>
+
+  <version>0.1</version>
+
+  <license>license</license>
+  <depends>
+    <app>desktop</app>
+    <app>content</app>
+    <app>ectools</app>
+    <app>b2c</app>
+  </depends>
+
+</app>

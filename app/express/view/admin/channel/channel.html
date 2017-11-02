@@ -1,0 +1,189 @@
+<style>
+select{width:120px;}
+</style>
+<div class="tableform">
+    <div class="division">
+        <form method="post" action="index.php?app=express&ctl=admin_channel&act=do_save" id="form_channel">
+        <input type="hidden" name="channel_id" value="<{$channel.channel_id}>">
+        <input type="hidden" name="bind_status" value="<{$channel.bind_status}>">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+        <tbody>
+            <tr>
+                <th>名称：</th>
+                <td><{input type="text" name="name" id="name" value=$channel.name size="30" vtype="required"}></td>
+            </tr>
+
+            <tr>
+                <th>来源类型：</th>
+                <td>
+                    <{if $channel.channel_type}>
+                        <{input type="select" id='channel_type' name='channel_type' rows=$channels value=$channel.channel_type valueColumn="code" labelColumn="name" disabled="disabled"}>
+                        <input type="hidden" name="channel_type" value="<{$channel.channel_type}>">
+                    <{else}>
+                        <{input type="select" id='channel_type' name='channel_type' rows=$channels value=$channels.0.code valueColumn="code" labelColumn="name" class="x-input-select inputstyle"}>
+                    <{/if}>
+                    &nbsp;<a id="genban_link" href="http://onex.shopex.cn/products/genban?from=ECStore" style="color:blue" target="_blank">什么是银派小跟班？</a>
+                </td>
+            </tr>
+
+            <tr>
+                <th>物流公司：</th>
+                <td id='logistics_td'>
+                    <{if $channel.channel_type}>
+                        <{input type="select" id='logistics_code' name='logistics_code' rows=$logistics value=$channel.logistics_code valueColumn="code" labelColumn="name" disabled="disabled"}>
+                    <{else}>
+                        <{input type="select" id='logistics_code' name='logistics_code' rows=$logistics value=$logistics.0.code valueColumn="code" labelColumn="name" class="x-input-select inputstyle"}>
+                    <{/if}>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" id="unionpay">
+            <tr>
+                <th>付款方式：</th>
+                <td id='unionpay_pay_method'>
+                    <{if $channel.pay_method}>
+                    <{input type="select" id='unionpay_pay_method' name='unionpay_pay_method' rows=$pay_method value=$channel.pay_method valueColumn="code" labelColumn="name" disabled="disabled"}>
+                    <{else}>
+                    <{input type="select" id='unionpay_pay_method' name='unionpay_pay_method' rows=$pay_method value=$pay_method.0.code valueColumn="code" labelColumn="name"}>
+                    <{/if}>
+                </td>
+            </tr>
+            <tr>
+                <th>客户号：</th>
+                <td><{input type="text" name="unionpay_uname" value=$channel.unionpay_uname size="30"}>&nbsp;<a href="<{$request_url}>" style="color:blue" target="_blank">申请开通</a></td>
+            </tr>
+            <tr id="unionpay_password">
+                <th>密码：</th>
+                <td ><{input  type="password"  name="unionpay_password" vtype="required" value=$channel.unionpay_password size="30"}>&nbsp;<em class="c-red">*</em></td>
+            </tr>
+        </table>
+        <div class="table-action">
+            <{button label="提交" type="submit" name="submit" id="btn-submit"}>
+            <{button label="关闭" type="button" id="btn-close"}>
+        </div>
+        </form>
+    </div>
+</div>
+<script>
+(function() {
+    var channel_type = "<{$channel.channel_type}>" ;
+
+    //关闭按钮
+    $('btn-close').addEvent('click', function(){
+        $('btn-close').getParent('.dialog').retrieve('instance').close();
+    });
+
+    $('form_channel').removeEvents('submit').addEvent('submit', function(e) {
+        e.stop();
+        if($('name').value==''){
+            return MessageBox.error('店铺名称不能为空！');
+        }
+        new Request ({
+            url:this.action,
+            onRequest:function(e){
+                //提交按钮:disabled
+                $('btn-submit').set('disabled', 'true');
+                $('btn-submit').getElements('span')[1].set('text','正在保存');
+            },
+            onComplete:function(result){  
+                if (result != 'SUCC'){
+                    MessageBox.error(result);
+                    //提交按钮:enabled
+                    $('btn-submit').set('disabled', '');
+                    $('btn-submit').getElements('span')[1].set('text','提交');
+                }else{
+                    //提交按钮:disabled
+                    var findId = "<{$env.get.finder_id}>";
+                    if (findId != '') {
+                        finderGroup["<{$env.get.finder_id}>"].refresh.delay(400,finderGroup["<{$env.get.finder_id}>"]);
+                    }
+                    $('btn-close').getParent('.dialog').retrieve('instance').close();
+                }
+            }
+        })[this.method](this);
+    });
+
+    $('channel_type').addEvent('change',function(){
+        var type = $("channel_type").value;
+
+        if(type=='unionpay'){
+            $('unionpay').show();
+            $('genban_link').show();
+        }else{
+            $('logistics_td').hide();
+            $('unionpay').hide();
+            $('genban_link').hide();
+            return false;
+        }
+
+        new Request({
+            url:'index.php?app=express&ctl=admin_channel&act=getLogistics',
+            data:'type='+type,
+            method:'post',
+            onSuccess:function(response){
+                var temp = '<select name="logistics_code" class="x-input-select inputstyle">';
+                if(response){
+                    var result = JSON.decode(response);
+                    Object.each(result,function(i,index){
+                        temp+='<option value='+i.code+'>'+i.name+'</option>';
+                    });
+                }
+                temp+='</select>';
+                $('logistics_td').show();
+                $('logistics_td').set('html', temp);
+            }
+        }).send();
+
+        if (paymethodlist(type)) {
+            new Request({
+                url:'index.php?app=express&ctl=admin_channel&act=getPayMethod',
+                data:'type='+type,
+                method:'post',
+                onSuccess:function(response){
+                    var temp1 = '<select name="pay_method" class="x-input-select inputstyle">';
+                    if(response){
+                        var result = JSON.decode(response);
+                        Object.each(result,function(i,index){
+                            temp1+='<option value='+i.code+'>'+i.name+'</option>';
+                        });
+                    }
+
+                    if( type == 'unionpay'){
+                        temp1+='</select>&nbsp;<em class="c-red">*</em>';
+                        $('unionpay_pay_method').show();
+                        $('unionpay_pay_method').set('html', temp1);
+                    }
+                    else{
+                        temp1+='</select>';
+                        $('pay_method_td').show();
+                        $('pay_method_td').set('html', temp1);
+                    }
+                }
+            }).send();
+        }
+    });
+
+    <{if $channel.channel_type=='unionpay'}>
+        $('unionpay').show();
+        $('genban_link').show();
+    <{else}>
+        $('logistics_td').hide();
+        $('unionpay').hide();
+        $('genban_link').hide();
+    <{/if}>
+
+    function paymethodlist(type) {
+        var typelist = Array('unionpay');
+        var status = false;
+        for(var i in typelist) {
+            if (typelist[i] == type) {
+                status = true;
+                break;
+            }
+        }
+        return status;
+    }
+})();
+</script>

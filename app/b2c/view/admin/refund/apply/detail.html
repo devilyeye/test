@@ -1,0 +1,87 @@
+<div class="tableform">
+    <h5><{t}>详细说明<{/t}></h5>
+    <div class="division">
+        <table cellspacing="0" cellpadding="0" border="0">
+		  <tbody>
+		      <tr>
+		          <th>退款申请单号：</th>
+		          <td><span><{$refund_apply_info.refund_apply_bn}></span></td>
+		      </tr>
+		      <tr>
+		          <th>当前状态：</th>
+		          <td>
+		              <span>
+		                  <{switch from=$refund_apply_info.status}>
+	                          <{case value='0'}><{t}>待处理<{/t}>
+	                          <{case value='1'}><{t}>已拒绝<{/t}>
+	                          <{case value='2'}><{t}>已退款<{/t}>
+                          <{/switch}>
+		              </span>
+		          </td>
+		      </tr>
+		      <tr>
+		          <th>订单号：</th>
+		          <td><span><{$refund_apply_info.order_id}></span></td>
+		      </tr>
+		      <tr>
+		          <th>付款信息：</th>
+		          <td><span><{$refund_apply_info.money|cur_odr}></span></td>
+		      </tr>
+		      <tr>
+		          <th>取消原因：</th>
+		          <td>
+		              <span><{$refund_apply_info.refunds_reason}></span>
+		         </td>
+		      </tr>
+		  </tbody>
+	    </table>
+    </div>
+    <h5><{t}>处理记录<{/t}></h5>
+    <div class="division">
+        <table cellspacing="0" cellpadding="0" border="0">
+          <tbody>
+              <{foreach from=$refund_apply_log item=log_item}>
+              <tr>
+                  <td><{$log_item.op_name}></td>
+                  <td><{$log_item.log_text}></td>
+                  <td><{$log_item.alttime|cdate:FDATE_STIME}></td>
+              </tr>
+              <{/foreach}>
+          </tbody>
+        </table>
+    </div>
+    
+    
+    <{if $showBtn==true}>
+	<div class="table-action">
+	       <a href="index.php?app=b2c&ctl=admin_refund_apply&act=gorefund&p[0]=<{$refund_apply_info.refund_apply_bn}>&p[1]=<{$refund_apply_info.order_id}>" target="dialog::{title:'<{t}>退款<{/t}>', width:800, height:420}" class="btn"><span><span>退款</span></span></a>
+	       <a href="javascript:void(0);" id="refuse_btn" class="btn"><span><span>拒绝</span></span></a> 
+	</div>
+    <{/if}>
+</div>
+
+<script>
+window.addEvent('domready',function(){
+    $('refuse_btn').addEvent('click', function(){
+    	if(!confirm('拒绝此退款申请，确认要执行吗?')){
+    		return false;
+    	}
+        new Request({
+            url:'index.php?app=b2c&ctl=admin_refund_apply&act=dorefuse',
+            data:'p[0]=<{$refund_apply_info.refund_apply_bn}>&p[1]=<{$refund_apply_info.order_id}>',
+            method:'post',
+            onSuccess:function(response){
+            	var hash_res_obj = JSON.decode(response);
+            	if(hash_res_obj.error){
+            		MessageBox.error(hash_res_obj.error);
+            	}
+            	if(hash_res_obj.success){
+            		MessageBox.success(hash_res_obj.success);
+            		window.location.reload();
+            	}
+            }
+        }).send();
+    });
+});
+
+</script>

@@ -1,0 +1,5 @@
+<apilist>
+    <module id='penker.bind' type='bind' class='penker_api_bind'>
+        <api  function='penker_bind'> 绑定朋客 </api>
+    </module>
+</apilist>

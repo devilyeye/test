@@ -1,0 +1,17 @@
+<services>
+    <service id="desktop_finder.express_mdl_dly_center">
+        <class>express_finder_dly_center</class>
+    </service>
+    
+    <service id="desktop_finder.express_mdl_print_tmpl">
+        <class>express_finder_print_tmpl</class>
+    </service>
+
+    <service id="desktop_finder.express_mdl_channel">
+        <class>express_finder_channel</class>
+    </service>
+
+    <service id="desktop_finder.express_mdl_print_tag">
+        <class>express_finder_print_tag</class>
+    </service>
+</services>

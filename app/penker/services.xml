@@ -1,0 +1,17 @@
+<services>
+    <service id="openapi.penker.callback.bind">
+        <class>penker_api_callback_bind</class>
+    </service>
+    <service id="openapi.penker.orders">
+        <class>penker_api_orders</class>
+    </service>
+    <service id="openapi.penker.goods">
+        <class>penker_api_goods</class>
+    </service>
+    <service id="openapi.penker.users">
+        <class>penker_api_users</class>
+    </service>
+    <service id="desktop_finder.penker_mdl_bind">
+        <class>penker_finder_bind</class>
+    </service>
+</services>

@@ -1,0 +1,31 @@
+    <div class="division">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="gridlist">
+    <!--<col class="Collongname"></col>-->
+    <col class="Coldetails"></col>
+    <col class="Colamount"></col>
+
+    <{if $is_minfo ==1}>
+      <{foreach from=$minfo  item="minfo"}>
+      <{t}><{$minfo.name}> x <{$minfo.quantity}><{/t}>
+      <thead>
+        <tr>
+          <th><{t}>信息项<{/t}></th>
+          <th><{t}>项目内容<{/t}></th>
+        </tr>
+      </thead>
+      <tbody>
+      <{foreach from=$minfo.minfo  item="minfo_info"}>
+      <tr>
+        <td><{$minfo_info.label}></td>
+    <!--    <td class="Coldetails"><{$aBill.pmt_memo}></td>-->
+        <td class="Colamount"><{$minfo_info.value}></td>
+      </tr>
+      </tbody>
+      <{/foreach}>
+      <{/foreach}>
+     <{else}>
+     无必填项 
+    <{/if}>
+
+    </table>
+    </div>

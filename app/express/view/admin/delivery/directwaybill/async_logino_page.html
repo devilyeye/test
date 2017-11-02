@@ -1,0 +1,196 @@
+<style>
+    .processBarBg {border:1px solid #999999; width:98%; margin:5px; height:25px;line-height:25px;padding:1px; background:#EEEEEE;}
+    .processBar {background:#3366cc; width:0px; padding-bottom:1px;overflow:hidden;}
+</style>
+<div class="tableform">
+    <div class="division">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" >
+        <tbody>
+            <tr>
+                <td align="left">
+                    <div class="division" style="display:none;" id="information">
+                        本次处理 <span id="iTotal" style="color:#083E96"></span> 个物流单号，
+                        <span id="iSucc" style="color:green"></span> 个成功，
+                        <span id="iFail" style="color:red"></span> 个失败，<span id="title">请稍候……</span>
+                    </div>
+
+                    <div id="processBarBg" class="processBarBg">
+                        <div id="processBar" class="processBar">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div id="addlogino">
+                        <form method='post' action='index.php?app=express&ctl=admin_delivery_printer&act=jumpToPrint&isdown=1' id='relate-delivery-form'>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td align="center">
+                    <{button label="开始获物流单" type="button" class="btn-primary" id="sync"}>
+                    <{button label="准备打印" type="button" class="btn-primary" id="startPrint"}>
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+var itemData = <{$postIds}>;
+var channel_id = <{$channel_id}>;
+var logi_id = <{$logi_id}>;
+var dly_center = <{$dly_center}>;
+var MaxProcessOrderNum = <{$MaxProcessOrderNum}>;
+var OrderQueue = new Array();
+var doTotal = 0;
+var doSucc = 0;
+var doFail = 0;
+function initOptQueue() {
+    var OrderHash = '';
+    var OrderNum = 0;
+    var OrderKey = '';
+
+    if (itemData == '') {
+        return;
+    }
+    var LeaveProcessOrderNum = itemData.length;
+    
+    if (MaxProcessOrderNum > LeaveProcessOrderNum) {
+        MaxProcessOrderNum = LeaveProcessOrderNum;
+    }
+
+    for (var i=0;i<itemData.length;i++) {
+        if (OrderHash == '')
+            OrderHash = itemData[i];
+        else
+            OrderHash = OrderHash + ';' + itemData[i];
+
+        OrderNum ++;
+
+        if (OrderNum >= MaxProcessOrderNum) {
+            OrderQueue.push(OrderHash);
+            OrderNum =0;
+            OrderHash = '';
+            LeaveProcessOrderNum = LeaveProcessOrderNum - MaxProcessOrderNum;
+            if (MaxProcessOrderNum > LeaveProcessOrderNum) {
+                MaxProcessOrderNum = LeaveProcessOrderNum;
+            }
+        }
+    }
+
+    if (OrderHash != '') {
+        OrderQueue.push(OrderHash);
+    }
+}
+
+function ajaxget(idx) {
+
+    if (idx >= OrderQueue.length || doTotal >= getTotal()) {
+        $('processBar').setStyle('width', '100%');
+        $('title').set('html', '处理完成。');
+        $('sync').hide();
+        $('startPrint').show();
+        $('startPrint').addEvent('click', function() {
+            formSubmit()
+        });
+    }
+    else {
+      var id = OrderQueue[idx];
+      var _data = {'id':id,'channel_id':channel_id,'logi_id':logi_id,'dly_center':dly_center};
+      
+      new Request({
+             url : "index.php?app=express&ctl=admin_delivery_printer&act=getWaybillLogiNo",
+             method : "post",
+             data: _data,
+             onComplete:function(result){
+                 if(!result) return;
+                 var ret = JSON.decode(result);
+                 if(ret['dealResult']) {
+                     doSucc += ret['doSucc'];
+                     doFail += ret['doFail'];
+                     doTotal += ret['doSucc'] + ret['doFail'];
+                     if(ret['succ']) {
+                         var iLenghth = ret['succ'].length;
+                         for (var i = 0; i < iLenghth; i++) {
+                             addFormElements(ret['succ'][i]);
+                         }
+                     }
+                 } else {
+                     if (ret['rsp'] == 'succ') {
+                         doSucc++;
+                         addFormElements(ret);
+                     }
+                     else {
+                         doFail++;
+                     }
+                     doTotal++;
+                 }
+                 displayProcessInfo();
+                 $('processBar').setStyle('width', (doTotal*100/(getTotal())) + '%');
+                 ajaxget(idx+1);
+             }
+      }).send();
+    }
+}
+
+function doRun() {
+    //禁用开始按钮
+    doTotal = 0;
+    doSucc = 0;
+    doFail = 0;
+    displayProcessInfo();
+    initOptQueue();
+    $('information').style.display ='';
+    $('processBarBg').style.display ='';
+    $('sync').disabled = true;
+    $('sync').set('html', '<span><span>数据处理中，请稍候！</span></span>');
+    ajaxget(0);
+}
+
+function getTotal() {
+    var total = <{$count}>;
+    return total;
+}
+
+function addFormElements(el) {
+    element = new Element('input', {
+        'name' : 'order_id',
+        'value' : el['order_id'],
+        'type' : 'hidden'
+    });
+    element.inject('relate-delivery-form', 'top');
+
+    element = new Element('input', {
+        'name' : 'corp_id',
+        'value' : <{$logi_id}>,
+        'type' : 'hidden'
+    });
+    element.inject('relate-delivery-form', 'top');
+
+    element = new Element('input', {
+        'name' : 'dly_center',
+        'value' : <{$dly_center}>,
+        'type' : 'hidden'
+    });
+    element.inject('relate-delivery-form', 'top');
+}
+
+/* 显示信息进度 */
+function displayProcessInfo() {
+    $('iTotal').set('html', getTotal());
+    $('iSucc').set('html', doSucc);
+    $('iFail').set('html', doFail);
+}
+
+/* 表单提交打印 */
+function formSubmit() {
+    var _form = $('relate-delivery-form');
+    _form.submit();
+}
+
+doRun();
+//$('sync').addEvent('click', function(){doRun();});
+$('startPrint').hide();
+</script>
